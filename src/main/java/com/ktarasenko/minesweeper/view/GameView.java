@@ -4,9 +4,12 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Toast;
 import com.ktarasenko.minesweeper.R;
 import com.ktarasenko.minesweeper.model.GameTable;
 import com.ktarasenko.minesweeper.model.TableGenerator;
@@ -48,9 +51,7 @@ public class GameView extends View {
         mCellSize = getResources().getDimension(R.dimen.cell_size);
         mHeight = GameTable.DEFAULT_HEIGHT;
         mWidth = GameTable.DEFAULT_WIDTH;
-        mGameTable = new GameTable(new TableGenerator());
-        mGameTable.cheat();
-        mGameStarted = true;
+        startNewGame();
     }
 
     @Override
@@ -128,5 +129,25 @@ public class GameView extends View {
         int y = (int) (py / mCellSize);
         mGameStarted = mGameTable.open(x,y);
         invalidate();
+    }
+
+    public void startNewGame() {
+        mGameTable = new GameTable(new TableGenerator());
+        mGameStarted = true;
+        invalidate();
+    }
+
+    public void cheat() {
+        if (mGameStarted){
+            mGameTable.cheat();
+            invalidate();
+        }
+    }
+    public void check() {
+        if (mGameStarted){
+            Toast.makeText(getContext(), mGameTable.check()? R.string.win : R.string.lose, Toast.LENGTH_SHORT).show();
+            mGameStarted = false;
+
+        }
     }
 }

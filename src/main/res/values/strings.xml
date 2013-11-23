@@ -1,4 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">minesweeper</string>
+    <string name="new_game">New Game</string>
+    <string name="cheat">Cheat</string>
+    <string name="check">Check</string>
+    <string name="win">You win</string>
+    <string name="lose">You lose</string>
 </resources>

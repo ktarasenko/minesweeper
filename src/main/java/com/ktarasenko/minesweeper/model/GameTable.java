@@ -1,7 +1,6 @@
 package com.ktarasenko.minesweeper.model;
 
 import android.os.Parcel;
-import android.os.Parcelable;
 import com.ktarasenko.minesweeper.util.Point;
 
 public class GameTable {
@@ -43,6 +42,12 @@ public class GameTable {
         int mines = state.readInt();
         generator = new TableGenerator(width, height, mines);
         table = new State[width][height];
+        State[] states = State.values();
+        for (int i = 0; i < table.length; i++){
+            for (int j = 0; j < table[i].length; j++){
+                table[i][j] = states[state.readInt()];
+            }
+        }
     }
 
     public boolean open(int x, int y){
@@ -102,7 +107,14 @@ public class GameTable {
     }
 
     public void saveState(Parcel outState){
-
+        outState.writeInt(generator.getWidth());
+        outState.writeInt(generator.getHeight());
+        outState.writeInt(generator.getMinesCount());
+        for (int i = 0; i < table.length; i++){
+            for (int j = 0; j < table[i].length; j++){
+                outState.writeInt(table[i][j].ordinal());
+            }
+        }
     }
 
 
