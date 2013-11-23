@@ -1,0 +1,56 @@
+//unit tests were added using http://robertomurray.co.uk/blog/2013/run-junit-tests-with-gradle-android/ manuals
+
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.5.6'
+    }
+}
+
+apply plugin: 'android'
+
+android {
+    compileSdkVersion 4
+    buildToolsVersion "17"
+
+    configurations {
+        unitTestCompile.extendsFrom runtime
+        unitTestRuntime.extendsFrom unitTestCompile
+    }
+
+
+    dependencies {
+        unitTestCompile files("$project.buildDir/classes/release")
+        unitTestCompile 'junit:junit:4.8.2'
+        unitTestCompile 'org.mockito:mockito-core:1.9.5'
+        unitTestCompile 'com.google.android:android:1.6_r2'
+    }
+
+
+    repositories {
+        mavenCentral()
+    }
+}
+
+sourceSets {
+    unitTest {
+        java.srcDir file('src/test/java')
+    }
+}
+
+
+task wrapper(type: Wrapper) {
+    gradleVersion = '1.6'
+}
+
+task unitTest(type:Test, dependsOn: assemble) {
+    description = "run unit tests"
+    testClassesDir = project.sourceSets.unitTest.output.classesDir
+    classpath = project.sourceSets.unitTest.runtimeClasspath
+}
+
+check.dependsOn unitTest
+
