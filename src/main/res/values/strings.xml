@@ -6,4 +6,8 @@
     <string name="check">Check</string>
     <string name="win">You win</string>
     <string name="lose">You lose</string>
+    <string name="start_new_game">Current progress will be lost. Start new game?</string>
+    <string name="height_caption">Height: %s</string>
+    <string name="width_caption">Width: %s</string>
+    <string name="mines_caption">Mines: %s</string>
 </resources>

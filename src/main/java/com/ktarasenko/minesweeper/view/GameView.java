@@ -4,8 +4,6 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.os.Bundle;
-import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
@@ -40,18 +38,18 @@ public class GameView extends View {
         init();
     }
 
-    public void setTableSize(int width, int height){
-        mWidth = width;
-        mHeight = height;
-        requestLayout();
+    private void setTableSize(int width, int height){
+        if (mWidth != width || mHeight != height){
+            mWidth = width;
+            mHeight = height;
+            requestLayout();
+        }
     }
 
     private void init() {
         mCellSizeInt = getResources().getDimensionPixelSize(R.dimen.cell_size);
         mCellSize = getResources().getDimension(R.dimen.cell_size);
-        mHeight = GameTable.DEFAULT_HEIGHT;
-        mWidth = GameTable.DEFAULT_WIDTH;
-        startNewGame();
+        startNewGame(GameTable.DEFAULT_WIDTH, GameTable.DEFAULT_HEIGHT, GameTable.DEFAULT_MINES);
     }
 
     @Override
@@ -63,17 +61,17 @@ public class GameView extends View {
         final int width = getMeasuredWidth();
         final int height = getMeasuredHeight();
         for (int i = 0; i < mWidth+1; i++){
-            mTable[i*4] = 0;
-            mTable[i*4+1]=  i*mCellSize;
-            mTable[i*4+2]=  height;
-            mTable[i*4+3]=  i*mCellSize;
+            mTable[i*4] =  i*mCellSize;
+            mTable[i*4+1]= 0;
+            mTable[i*4+2]= i*mCellSize;
+            mTable[i*4+3]=   height;
         }
         final int offset = (mWidth +1) * 4;
         for (int i = 0; i < mHeight+1; i++){
-            mTable[offset+ i*4] = i*mCellSize;
-            mTable[offset + i*4+1]=  0;
-            mTable[offset+ i*4+2]=  i*mCellSize;
-            mTable[offset+ i*4+3]=  width;
+            mTable[offset+ i*4] = 0;
+            mTable[offset + i*4+1]=  i*mCellSize;
+            mTable[offset+ i*4+2]=  width;
+            mTable[offset+ i*4+3]=  i*mCellSize;
         }
     }
 
@@ -84,23 +82,27 @@ public class GameView extends View {
         p.setColor(Color.BLACK);
         p.setTextSize(mCellSize);
         canvas.drawLines(mTable, p);
-
+        final float offset =  mCellSize/6;
         for (int i = 0; i < mWidth; i++){
             for (int j = 0; j < mHeight; j++){
                 GameTable.State s = mGameTable.get(i, j);
+                int coordX = (int) (mCellSize * i+ offset);
+                int coordY = (int) (mCellSize * (j+1) - offset);
                 switch (s){
                     case CLOSED:
-                        canvas.drawText("?", mCellSize * i, mCellSize * (j+1), p);
+//                        canvas.drawText("?", mCellSize * i, mCellSize * (j+1), p);
                         break;
                     case CHEATING_MINE:
-                        canvas.drawText("*", mCellSize * i, mCellSize * (j+1), p);
+                        canvas.drawText("*",coordX, coordY, p);
                         break;
                     case EXPLODED_MINE:
-                        canvas.drawText("**", mCellSize * i, mCellSize * (j+1), p);
+                        p.setColor(Color.RED);
+                        canvas.drawText("**",coordX, coordY , p);
+                        p.setColor(Color.BLACK);
                         break;
                     default:
                         canvas.drawText(String.valueOf(s.ordinal() - GameTable.State.EMPTY.ordinal()),
-                                mCellSize * i, mCellSize * (j+1), p);
+                                coordX, coordY, p);
                         break;
                 }
             }
@@ -119,7 +121,7 @@ public class GameView extends View {
         return super.onTouchEvent(event);
     }
 
-    private boolean isGameStarted() {
+    public boolean isGameStarted() {
         return mGameStarted;
     }
 
@@ -128,11 +130,15 @@ public class GameView extends View {
         int x = (int) (px /mCellSize);
         int y = (int) (py / mCellSize);
         mGameStarted = mGameTable.open(x,y);
+        if (!mGameStarted){
+            Toast.makeText(getContext(), R.string.lose, Toast.LENGTH_SHORT).show();
+        }
         invalidate();
     }
 
-    public void startNewGame() {
-        mGameTable = new GameTable(new TableGenerator());
+    public void startNewGame(int width, int height, int mines) {
+        setTableSize(width, height);
+        mGameTable = new GameTable(new TableGenerator(width, height, mines));
         mGameStarted = true;
         invalidate();
     }
