@@ -4,6 +4,10 @@ import android.os.Parcelable;
 
 public class GameTable {
 
+    public static final int DEFAULT_HEIGHT = 8;
+    public static final int DEFAULT_WIDTH = 8;
+    public static final int DEFAULT_MINES = 10;
+
     public static final int MAX_SIZE = 10;
 
     public enum State {

@@ -35,7 +35,7 @@ public class ModelTest extends TestCase {
 
     public void testGameTableInitDimensionsMax(){
         try {
-            new GameTable(GameTable.MAX_SIZE, GameTable.MAX_SIZE, 8);
+            new GameTable(GameTable.MAX_SIZE + 1, GameTable.MAX_SIZE + 1, 8);
             fail();
         } catch (Throwable t){
             assertEquals("Should throw IllegalArgumentException on dimensions > MAX_SIZE",
