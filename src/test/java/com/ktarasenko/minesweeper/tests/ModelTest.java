@@ -1,10 +1,11 @@
 package com.ktarasenko.minesweeper.tests;
 
-import com.ktarasenko.minesweeper.util.Pair;
 import com.ktarasenko.minesweeper.model.GameTable;
 import com.ktarasenko.minesweeper.model.TableGenerator;
+import com.ktarasenko.minesweeper.util.Point;
 import junit.framework.TestCase;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
 import static org.mockito.Mockito.*;
@@ -14,12 +15,27 @@ public class ModelTest extends TestCase {
     public void testTableGenerator(){
         for (int i = 0; i < 100; i++){
            TableGenerator generator = new TableGenerator();
-           HashSet<Pair<Integer,Integer>> set = new HashSet<Pair<Integer, Integer>>();
+           HashSet<Point> set = new HashSet<Point>();
            for (int j = 0; j < generator.getMinesCount(); j++){
                set.add(generator.next());
            }
            assertEquals("Generator should plant distinct mines on every call", generator.getMinesCount(),set.size());
         }
+    }
+
+    public void testGeneratorGetNeighbours(){
+        TableGenerator generator = new TableGenerator();
+        ArrayList<Point> points = generator.getNeighbors(0,0);
+        assertTrue("There should be 3 neighbours for 0,0", points.size() == 3);
+        assertTrue("There should  neighbours for 0,0: 1,0 1,1 0,1", points.contains(new Point(0,1)) && points.contains(new Point(1,1)) && points.contains(new Point(1,0)));
+        points = generator.getNeighbors(2,2);
+        assertTrue("There should be 8 neighbours for 0,0", points.size() == 8);
+        points = generator.getNeighbors(generator.getWidth() -1, generator.getHeight() -1);
+        assertTrue("There should be 3 neighbours for right corner point", points.size() == 3);
+
+        points = generator.getNeighbors(1, generator.getHeight() -1);
+        assertTrue("There should be 5 neighbours for that point", points.size() == 5);
+
     }
 
 
@@ -64,10 +80,10 @@ public class ModelTest extends TestCase {
     }
 
     public void testOneMine(){
-        TableGenerator tableGenerator = mock(TableGenerator.class);
-        when(tableGenerator.next()).thenReturn(Pair.create(0, 0));
+        TableGenerator tableGenerator = createTableGeneratorMock();
+        when(tableGenerator.next()).thenReturn(new Point(0, 0));
         GameTable table = new GameTable(tableGenerator);
-        assertTrue("clicking on a field without a mine should return true",table.open(1,1));
+        assertTrue("clicking on a field without a mine should return true",table.open(2,2));
         assertTrue("puzzle should be open then ", table.check());
         assertFalse("clicking on a field with a mine should return false", table.open(0, 0));
     }
@@ -75,12 +91,12 @@ public class ModelTest extends TestCase {
     public void testFullOfMines(){
         TableGenerator tableGenerator = new TableGenerator(2, 2, 4);
         GameTable table = new GameTable(tableGenerator);
-        assertFalse("clicking on any field should trigger a mine", !table.open(1, 1));
+        assertFalse("clicking on any field should trigger a mine", table.open(1, 1));
     }
 
     public void testCheats(){
-        TableGenerator tableGenerator = mock(TableGenerator.class);
-        when(tableGenerator.next()).thenReturn(Pair.create(0, 0));
+        TableGenerator tableGenerator = createTableGeneratorMock();
+        when(tableGenerator.next()).thenReturn(new Point(0, 0));
         GameTable table = new GameTable(tableGenerator);
         table.cheat();
         assertTrue("cheat command should reveal mines", table.get(0,0) == GameTable.State.CHEATING_MINE);
@@ -97,20 +113,20 @@ public class ModelTest extends TestCase {
     }
 
     public void testStatesOneOpen(){
-        TableGenerator tableGenerator = mock(TableGenerator.class);
-        when(tableGenerator.next()).thenReturn(Pair.create(0, 0));
+        TableGenerator tableGenerator = createTableGeneratorMock();
+        when(tableGenerator.next()).thenReturn(new Point(0, 0));
         GameTable table = new GameTable(tableGenerator);
-        table.open(2,2);
+        table.open(2, 2);
         assertTrue("expecting EMPTY", table.get(2, 2) == GameTable.State.EMPTY);
         assertTrue("expecting ONE", table.get(1, 1) == GameTable.State.ONE);
         assertTrue("expecting ONE", table.get(1, 0) == GameTable.State.ONE);
         assertTrue("expecting ONE", table.get(0, 1) == GameTable.State.ONE);
-        assertTrue("expecting CLOSED", table.get(0,0) == GameTable.State.CLOSED);
+        assertTrue("expecting CLOSED", table.get(0, 0) == GameTable.State.CLOSED);
     }
 
     public void testStatesOpen2(){
-        TableGenerator tableGenerator = mock(TableGenerator.class);
-        when(tableGenerator.next()).thenReturn(Pair.create(0, 0), Pair.create(1,1));
+        TableGenerator tableGenerator = createTableGeneratorMock();
+        when(tableGenerator.next()).thenReturn(new Point(0, 0), new Point(1,1));
         GameTable table = new GameTable(tableGenerator);
         table.open(2, 2);
         assertTrue("expecting ONE", table.get(2, 2) == GameTable.State.ONE);
@@ -118,8 +134,18 @@ public class ModelTest extends TestCase {
         assertTrue("expecting TWO", table.get(0, 1) == GameTable.State.TWO);
         table.open(1, 0);
         assertTrue("expecting TWO", table.get(1, 0) == GameTable.State.TWO);
-        assertTrue("expecting CLOSED", table.get(0,0) == GameTable.State.CLOSED);
-        assertTrue("expecting CLOSED", table.get(1,1) == GameTable.State.CLOSED);
+        assertTrue("expecting CLOSED", table.get(0, 0) == GameTable.State.CLOSED);
+        assertTrue("expecting CLOSED", table.get(1, 1) == GameTable.State.CLOSED);
+    }
+
+
+    private TableGenerator createTableGeneratorMock() {
+        TableGenerator tableGenerator = mock(TableGenerator.class);
+        when(tableGenerator.getNeighbors(anyInt(), anyInt())).thenCallRealMethod();
+        when(tableGenerator.getHeight()).thenReturn(GameTable.DEFAULT_HEIGHT);
+        when(tableGenerator.getWidth()).thenReturn(GameTable.DEFAULT_WIDTH);
+        when(tableGenerator.getMinesCount()).thenReturn(GameTable.DEFAULT_MINES);
+        return  tableGenerator;
     }
 
 }

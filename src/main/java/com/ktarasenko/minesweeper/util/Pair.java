@@ -22,7 +22,7 @@ package com.ktarasenko.minesweeper.util;
  * implementation of equals(), returning true if equals() is true on each of the contained
  * objects.
  */
-public class Pair<F, S> {
+class Pair<F, S> {
     public final F first;
     public final S second;
 
