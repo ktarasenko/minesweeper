@@ -8,6 +8,7 @@ import android.util.AttributeSet;
 import android.view.View;
 import com.ktarasenko.minesweeper.R;
 import com.ktarasenko.minesweeper.model.GameTable;
+import com.ktarasenko.minesweeper.model.TableGenerator;
 
 public class GameView extends View {
 
@@ -17,6 +18,7 @@ public class GameView extends View {
     private int mWidth;
     private float[] mTable;
     private int mCellSizeInt;
+    private GameTable mGameTable;
 
     public GameView(Context context) {
         super(context);
@@ -44,6 +46,8 @@ public class GameView extends View {
        mCellSize = getResources().getDimension(R.dimen.cell_size);
        mHeight = GameTable.DEFAULT_HEIGHT;
        mWidth = GameTable.DEFAULT_WIDTH;
+       mGameTable = new GameTable(new TableGenerator());
+       mGameTable.cheat();
     }
 
     @Override
@@ -74,6 +78,30 @@ public class GameView extends View {
         super.onDraw(canvas);
         Paint p = new Paint();
         p.setColor(Color.BLACK);
+        p.setTextSize(mCellSize);
         canvas.drawLines(mTable, p);
+
+        for (int i = 0; i < mWidth; i++){
+            for (int j = 0; j < mHeight; j++){
+                GameTable.State s = mGameTable.get(i, j);
+               switch (s){
+                   case CLOSED:
+                       canvas.drawText("?", mCellSize * i, mCellSize * (j+1), p);
+                       break;
+                   case CHEATING_MINE:
+                       canvas.drawText("*", mCellSize * i, mCellSize * (j+1), p);
+                       break;
+                   case EXPLODED_MINE:
+                       canvas.drawText("**", mCellSize * i, mCellSize * (j+1), p);
+                       break;
+                   default:
+                       canvas.drawText(String.valueOf(s.ordinal() - GameTable.State.EMPTY.ordinal()),
+                               mCellSize * i, mCellSize * (j+1), p);
+                       break;
+               }
+            }
+        }
+
+
     }
 }
