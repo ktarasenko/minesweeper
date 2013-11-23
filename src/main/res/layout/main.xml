@@ -3,11 +3,13 @@
               android:orientation="vertical"
               android:layout_width="fill_parent"
               android:layout_height="fill_parent"
+              android:background="@android:color/white"
         >
-    <TextView
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:text="Hello World, GameActivity"
-            />
+   <com.ktarasenko.minesweeper.view.GameView
+       android:layout_height="wrap_content"
+       android:layout_width="wrap_content"
+       android:layout_marginTop="10dp"
+       android:layout_gravity="center"/>
+
 </LinearLayout>
 
